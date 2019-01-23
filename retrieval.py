@@ -41,7 +41,7 @@ def make_retrieval_arrays(tracer, set_year, set_day):
             for i in range(0, len(tracer_scans)):
                 if tracer_scans[i] > 0:
                     tracer_scans_good = np.append(tracer_scans_good, tracer_scans[i])
-            if len(tracer_scans_good) == 1:
+            if len(tracer_scans_good) < 2:
                 tracer_scans_good = 0
             tracer_scans_mean = np.mean(tracer_scans_good)
             tracer_bin[j,k] = tracer_scans_mean                               
@@ -60,10 +60,12 @@ def calc_cos_factor(tracer_bin, lowlat, highlat):
     return tracer_weighted
 
 def pressure_plot_2d(tracer_bin, name, units):
+    x, y = np.meshgrid(lats_bin, pressure)
     if name == 'ozone':
         diffs = [1.e+7, 1.75e+7, 2.5e+7, 3.25e+7, 4.e+7, 4.75e+7, 5.5e+7, 6.25e+7, 7.e+7, 7.75e+7, 8.5e+7, 9.25e+7, 1.e+8, 1.75e+8, 2.5e+8, 3.25e+8, 4.e+8, 4.75e+8, 5.5e+8, 6.25e+8, 7.e+8, 7.75e+8, 8.5e+8, 9.25e+8, 1.e+9]
-    x, y = np.meshgrid(lats_bin, pressure)
-    plt.contourf(x[:,:], y[:,:], tracer_bin, diffs, norm=colors.LogNorm(), cmap=plt.get_cmap('viridis'))
+        plt.contourf(x[:,:], y[:,:], tracer_bin, diffs, norm=colors.LogNorm(), cmap=plt.get_cmap('viridis'))
+    else:
+        plt.contourf(x[:,:], y[:,:], tracer_bin, norm=colors.LogNorm(), cmap=plt.get_cmap('viridis'))
     cbar = plt.colorbar()
     cbar.ax.tick_params(labelsize=12)
     cbar.set_label('%s [%s]' %(name, units), fontsize=12)
@@ -77,16 +79,28 @@ def pressure_plot_2d(tracer_bin, name, units):
     return
 
 def altitude_plot_2d(tracer_bin, name, units):
-    if name == 'ozone':
-        diffs = [1.e+7, 1.75e+7, 2.5e+7, 3.25e+7, 4.e+7, 4.75e+7, 5.5e+7, 6.25e+7, 7.e+7, 7.75e+7, 8.5e+7, 9.25e+7, 1.e+8, 1.75e+8, 2.5e+8, 3.25e+8, 4.e+8, 4.75e+8, 5.5e+8, 6.25e+8, 7.e+8, 7.75e+8, 8.5e+8, 9.25e+8, 1.e+9]
     x, y = np.meshgrid(lats_bin, pressure)
     y = alt_bin
-    plt.contourf(x[:,:], y[:,:], tracer_bin, diffs, norm=colors.LogNorm(), cmap=plt.get_cmap('viridis'))
+    if name == 'ozone':
+        diffs = [1.e+7, 1.75e+7, 2.5e+7, 3.25e+7, 4.e+7, 4.75e+7, 5.5e+7, 6.25e+7, 7.e+7, 7.75e+7, 8.5e+7, 9.25e+7, 1.e+8, 1.75e+8, 2.5e+8, 3.25e+8, 4.e+8, 4.75e+8, 5.5e+8, 6.25e+8, 7.e+8, 7.75e+8, 8.5e+8, 9.25e+8, 1.e+9]
+        plt.contourf(x[:,:], y[:,:], tracer_bin, diffs, norm=colors.LogNorm(), cmap=plt.get_cmap('viridis'))
+    if name == 'atomic_oxygen':
+        diffs = [1.e+0, 2.5e+0, 4.e+0, 5.5e+0, 7.e+0, 8.5e+0, 1.e+1, 2.5e+1, 4.e+1, 5.5e+1, 7.e+1, 8.5e+1, 1.e+2, 2.5e+2, 4.e+2, 5.5e+2, 7.e+2, 8.5e+2, 1.e+3, 2.5e+3, 4.e+3, 5.5e+3, 7.e+3, 8.5e+3, 1.e+4, 2.5e+4, 4.e+4, 5.5e+4, 7.e+4, 8.5e+4, 1.e+5]
+        plt.contourf(x[:,:], y[:,:], tracer_bin, diffs, norm=colors.LogNorm(), cmap=plt.get_cmap('viridis'))
+    if name == 'atomic_hydrogen':
+        diffs = [1.e-2, 2.5e-2, 4.e-2, 5.5e-2, 7.e-2, 8.5e-2, 1.e-1, 2.5e-1, 4.e-1, 5.5e-1, 7.e-1, 8.5e-1, 1.e+0, 2.5e+0, 4.e+0, 5.5e+0, 7.e+0, 8.5e+0, 1.e+1]
+        plt.contourf(x[:,:], y[:,:], tracer_bin, diffs, norm=colors.LogNorm(), cmap=plt.get_cmap('viridis'))
+    if name == 'temperature':
+        diffs = np.arange(150,225,5)
+        plt.contourf(x[:,:], y[:,:], tracer_bin, diffs, cmap=plt.get_cmap('viridis'))
+    else:
+        plt.contourf(x[:,:], y[:,:], tracer_bin, norm=colors.LogNorm(), cmap=plt.get_cmap('viridis'))
     cbar = plt.colorbar()
     cbar.ax.tick_params(labelsize=12)
     cbar.set_label('%s [%s]' %(name, units), fontsize=12)
     plt.xticks(np.arange(-90, 120, 30), fontsize=12)
     plt.xlabel('Latitude [%s]' %deg, fontsize=12)
+    plt.ylim(77,100)
     plt.yticks([80, 85, 90, 95, 100], fontsize=12)
     plt.ylabel('Altitude [km]', fontsize=12)
     plt.title('%s, DOY=%s' %(set_year, set_day), fontsize=14)  
@@ -121,13 +135,16 @@ def altitude_plot_1d(name, tracer_weighted, alt_weighted, lowlat, highlat, units
         plt.xlabel('%s [%s]' %(name, units), fontsize=12)
         plt.tick_params(labelleft='off')
     if name == 'ozone':
-        plt.xlim(0,7.e+8)
+        plt.ticklabel_format(style='sci', axis='x', scilimits=(0,0))
+        plt.xlim(0,5.e+8)
     if name == 'atomic_oxygen':
         plt.ticklabel_format(style='sci', axis='x', scilimits=(0,0))
         plt.xlim(0,50000)
     if name == 'atomic_hydrogen':
         plt.ticklabel_format(style='sci', axis='x', scilimits=(0,0))
-        plt.xlim(0,3)
+        plt.xlim(0,5)
+    if name == 'temperature':
+        plt.xlim(150,220)
     if plot_no == 2:
         plt.legend(loc=1)
     return
@@ -154,11 +171,14 @@ gs1 = gridspec.GridSpec(2, 3)
 gs1.update(wspace=0.1, hspace=0.1)
 #setup_altitude_plot_1d(o3_bin, 'ozone', '$\mathregular{cm^{-3}}$')
 #setup_altitude_plot_1d(o_bin, 'atomic_oxygen', 'ppmv')
-setup_altitude_plot_1d(h_bin, 'atomic_hydrogen', 'ppmv')
-#setup_altitude_plot_1d(T_bin, 'temperature', 'K')
+#setup_altitude_plot_1d(h_bin, 'atomic_hydrogen', 'ppmv')
+setup_altitude_plot_1d(T_bin, 'temperature', 'K')
 
 # 2D plot
 #pressure_plot_2d(o3_bin, 'ozone', '$\mathregular{cm^{-3}}$')
 #altitude_plot_2d(o3_bin, 'ozone', '$\mathregular{cm^{-3}}$')
+#altitude_plot_2d(o_bin, 'atomic_oxygen', 'ppmv')
+#altitude_plot_2d(h_bin, 'atomic_hydrogen', 'ppmv')
+#altitude_plot_2d(T_bin, 'temperature', 'K')
 
 plt.show()
