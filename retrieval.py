@@ -24,6 +24,9 @@ event = fname.variables['event'][:]
 fname.close
 
 o3_bin = np.zeros([16,36])
+o_bin = np.zeros([16,36])
+h_bin = np.zeros([16,36])
+T_bin = np.zeros([16,36])
 alt_bin = np.zeros([16,36])
 
 def make_retrieval_arrays(tracer, set_year, set_day):
@@ -34,8 +37,14 @@ def make_retrieval_arrays(tracer, set_year, set_day):
             k_max = (k*5) - 85      
             time_lat_bin = np.append(np.where((lats > k_min) & (lats < k_max) & (year == set_year) & (day == set_day)), True)        
             tracer_scans = tracer[time_lat_bin, j]
-            tracer_scans_mean = np.mean(tracer_scans)
-            tracer_bin[j,k] = tracer_scans_mean
+            tracer_scans_good = np.array([])
+            for i in range(0, len(tracer_scans)):
+                if tracer_scans[i] > 0:
+                    tracer_scans_good = np.append(tracer_scans_good, tracer_scans[i])
+            if len(tracer_scans_good) == 1:
+                tracer_scans_good = 0
+            tracer_scans_mean = np.mean(tracer_scans_good)
+            tracer_bin[j,k] = tracer_scans_mean                               
     return tracer_bin      
 
 def calc_cos_factor(tracer_bin, lowlat, highlat):
@@ -118,6 +127,7 @@ def altitude_plot_1d(name, tracer_weighted, alt_weighted, lowlat, highlat, units
         plt.xlim(0,50000)
     if name == 'atomic_hydrogen':
         plt.ticklabel_format(style='sci', axis='x', scilimits=(0,0))
+        plt.xlim(0,3)
     if plot_no == 2:
         plt.legend(loc=1)
     return
