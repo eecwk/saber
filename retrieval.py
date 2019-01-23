@@ -6,9 +6,14 @@ import math
 from matplotlib import colors
 
 deg = unichr(176)
+set_year = 2014
+set_day = 6
 
-fname = netCDF4.Dataset('/nfs/a265/earfw/CHRIS/SABER/NIGHTLY/atox_athy_night_YY2014_V5.3_fixedfnight_SV2.nc', 'r', format='NETCDF4')
+fname = netCDF4.Dataset('/nfs/a265/earfw/CHRIS/SABER/NIGHTLY/atox_athy_night_YY%s_V5.3_fixedfnight_SV2.nc' %set_year, 'r', format='NETCDF4')
 o3 = fname.variables['o3conc'][:]
+o = fname.variables['qatox'][:]*(1.e+6)
+h = fname.variables['qathy'][:]*(1.e+6)
+T = fname.variables['ktemp'][:]
 lats = fname.variables['lat'][:]
 pressure = fname.variables['pressure'][:]
 alt = fname.variables['alt'][:]
@@ -87,6 +92,7 @@ def altitude_plot_1d(name, tracer_weighted, alt_weighted, lowlat, highlat, units
     x = tracer_weighted[::-1]
     y = alt_weighted[::-1]
     plt.plot(x, y, color='k', label='saber')
+    plt.ylim(77,100)
     if plot_no == 0:
         plt.ylabel('Altitude [km]', fontsize=12)
         plt.tick_params(labelbottom='off')
@@ -105,8 +111,13 @@ def altitude_plot_1d(name, tracer_weighted, alt_weighted, lowlat, highlat, units
     if plot_no == 5:
         plt.xlabel('%s [%s]' %(name, units), fontsize=12)
         plt.tick_params(labelleft='off')
-    plt.ylim(77,100)
-    plt.xlim(0,7.e+8)
+    if name == 'ozone':
+        plt.xlim(0,7.e+8)
+    if name == 'atomic_oxygen':
+        plt.ticklabel_format(style='sci', axis='x', scilimits=(0,0))
+        plt.xlim(0,50000)
+    if name == 'atomic_hydrogen':
+        plt.ticklabel_format(style='sci', axis='x', scilimits=(0,0))
     if plot_no == 2:
         plt.legend(loc=1)
     return
@@ -120,10 +131,10 @@ def setup_altitude_plot_1d(tracer_bin, name, units):
         alt_weighted = calc_cos_factor(alt_bin, lowlat, highlat)
         altitude_plot_1d(name, tracer_weighted, alt_weighted, lowlat, highlat, units, i)
 
-set_year = 2014
-set_day = 6
-
 o3_bin = make_retrieval_arrays(o3, set_year, set_day)
+o_bin = make_retrieval_arrays(o, set_year, set_day)
+h_bin = make_retrieval_arrays(h, set_year, set_day)
+T_bin = make_retrieval_arrays(T, set_year, set_day)
 alt_bin = make_retrieval_arrays(alt, set_year, set_day)
 lats_bin = np.arange(-87.5, 92.5, 5)
 
@@ -131,7 +142,10 @@ lats_bin = np.arange(-87.5, 92.5, 5)
 fig, axes = plt.subplots(nrows=2, ncols=3, figsize=(11,8))
 gs1 = gridspec.GridSpec(2, 3)
 gs1.update(wspace=0.1, hspace=0.1)
-setup_altitude_plot_1d(o3_bin, 'ozone', '$\mathregular{cm^{-3}}$')
+#setup_altitude_plot_1d(o3_bin, 'ozone', '$\mathregular{cm^{-3}}$')
+#setup_altitude_plot_1d(o_bin, 'atomic_oxygen', 'ppmv')
+setup_altitude_plot_1d(h_bin, 'atomic_hydrogen', 'ppmv')
+#setup_altitude_plot_1d(T_bin, 'temperature', 'K')
 
 # 2D plot
 #pressure_plot_2d(o3_bin, 'ozone', '$\mathregular{cm^{-3}}$')
