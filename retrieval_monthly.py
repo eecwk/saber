@@ -17,16 +17,18 @@ lats = fname.variables['tplatitude'][:]
 #pressure = fname.variables['pressure'][:]
 alt = fname.variables['tpaltitude'][:]
 date = fname.variables['date'][:]
+time = fname.variables['time'][:]
 fname.close
 levels = 374
 
 o3_96_bin = np.zeros([levels,36])
 o3_127_bin = np.zeros([levels,36])
 T_bin = np.zeros([levels,36])
-alt_bin = np.zeros([levels,36])
 lats_bin = np.zeros([levels,36])
+alt_bin = np.zeros([levels,36])
+time_bin = np.zeros([levels,36])
 
-def make_retrieval_arrays(tracer, set_year, set_day):
+def make_retrieval_arrays(tracer):
     tracer_bin = np.zeros([levels,36])
     for j in range(0,levels):
         for k in range(0,36):            
@@ -57,29 +59,15 @@ def calc_cos_factor(tracer_bin, lowlat, highlat):
     return tracer_weighted
 
 def altitude_plot_2d(tracer_bin, name, units):
-    x, y = np.meshgrid(lats_bin, pressure)
+    x = lats_bin
     y = alt_bin
-    if name == 'ozone':
-        diffs = [1.e+7, 1.75e+7, 2.5e+7, 3.25e+7, 4.e+7, 4.75e+7, 5.5e+7, 6.25e+7, 7.e+7, 7.75e+7, 8.5e+7, 9.25e+7, 1.e+8, 1.75e+8, 2.5e+8, 3.25e+8, 4.e+8, 4.75e+8, 5.5e+8, 6.25e+8, 7.e+8, 7.75e+8, 8.5e+8, 9.25e+8, 1.e+9]
-        plt.contourf(x[:,:], y[:,:], tracer_bin, diffs, norm=colors.LogNorm(), cmap=plt.get_cmap('viridis'))
-    if name == 'atomic_oxygen':
-        diffs = [1.e+0, 2.5e+0, 4.e+0, 5.5e+0, 7.e+0, 8.5e+0, 1.e+1, 2.5e+1, 4.e+1, 5.5e+1, 7.e+1, 8.5e+1, 1.e+2, 2.5e+2, 4.e+2, 5.5e+2, 7.e+2, 8.5e+2, 1.e+3, 2.5e+3, 4.e+3, 5.5e+3, 7.e+3, 8.5e+3, 1.e+4, 2.5e+4, 4.e+4, 5.5e+4, 7.e+4, 8.5e+4, 1.e+5]
-        plt.contourf(x[:,:], y[:,:], tracer_bin, diffs, norm=colors.LogNorm(), cmap=plt.get_cmap('viridis'))
-    if name == 'atomic_hydrogen':
-        diffs = [1.e-2, 2.5e-2, 4.e-2, 5.5e-2, 7.e-2, 8.5e-2, 1.e-1, 2.5e-1, 4.e-1, 5.5e-1, 7.e-1, 8.5e-1, 1.e+0, 2.5e+0, 4.e+0, 5.5e+0, 7.e+0, 8.5e+0, 1.e+1]
-        plt.contourf(x[:,:], y[:,:], tracer_bin, diffs, norm=colors.LogNorm(), cmap=plt.get_cmap('viridis'))
-    if name == 'temperature':
-        diffs = np.arange(150,225,5)
-        plt.contourf(x[:,:], y[:,:], tracer_bin, diffs, cmap=plt.get_cmap('viridis'))
-    else:
-        plt.contourf(x[:,:], y[:,:], tracer_bin, norm=colors.LogNorm(), cmap=plt.get_cmap('viridis'))
+    plt.contourf(x[:,:], y[:,:], tracer_bin, norm=colors.LogNorm(), cmap=plt.get_cmap('viridis'))
     cbar = plt.colorbar()
     cbar.ax.tick_params(labelsize=12)
     cbar.set_label('%s [%s]' %(name, units), fontsize=12)
     plt.xticks(np.arange(-90, 120, 30), fontsize=12)
     plt.xlabel('Latitude [%s]' %deg, fontsize=12)
-    plt.ylim(77,100)
-    plt.yticks([80, 85, 90, 95, 100], fontsize=12)
+    plt.ylim(60,160)
     plt.ylabel('Altitude [km]', fontsize=12)
     plt.title('%s %s' %(set_month, set_year), fontsize=14)  
 
@@ -135,10 +123,11 @@ def setup_altitude_plot_1d(tracer_bin, name, units):
         alt_weighted = calc_cos_factor(alt_bin, lowlat, highlat)
         altitude_plot_1d(name, tracer_weighted, alt_weighted, lowlat, highlat, units, i)
 
-o3_96_bin = make_retrieval_arrays(o3_96, set_year, 0)
-#T_bin = make_retrieval_arrays(T, set_year, 0)
-alt_bin = make_retrieval_arrays(alt, set_year, 0)
-lats_bin = make_retrieval_arrays(lats, set_year, 0)
+o3_96_bin = make_retrieval_arrays(o3_96)
+#T_bin = make_retrieval_arrays(T)
+alt_bin = make_retrieval_arrays(alt)
+lats_bin = make_retrieval_arrays(lats)
+time_bin = make_retrieval_arrays(time)
 
 # 1D plot
 fig, axes = plt.subplots(nrows=2, ncols=3, figsize=(11,8))
@@ -147,9 +136,6 @@ gs1.update(wspace=0.1, hspace=0.1)
 setup_altitude_plot_1d(o3_96_bin*1.e+6, 'ozone_96', 'ppmv')
 
 # 2D plot
-#altitude_plot_2d(o3_bin, 'ozone', '$\mathregular{cm^{-3}}$')
-#altitude_plot_2d(o_bin, 'atomic_oxygen', 'ppmv')
-#altitude_plot_2d(h_bin, 'atomic_hydrogen', 'ppmv')
-#altitude_plot_2d(T_bin, 'temperature', 'K')
+#altitude_plot_2d(o3_96_bin*1.e+6, 'ozone_96', 'ppmv')
 
 plt.show()
