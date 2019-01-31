@@ -22,6 +22,7 @@ day = fname.variables['day'][:]
 orbit = fname.variables['orbit'][:]
 event = fname.variables['event'][:]
 fname.close
+lats_bin_mid_saber = np.arange(-87.5, 92.5, 5)
 
 o3_bin = np.zeros([16,36])
 o_bin = np.zeros([16,36])
@@ -53,8 +54,8 @@ def calc_cos_factor(tracer_bin, lowlat, highlat):
         sig_cos_x = 0
         sig_cos = 0
         for k in range (lowlat, highlat):
-            sig_cos_x = sig_cos_x + (math.cos(math.radians(lats[k])) * tracer_bin[j][k])
-            sig_cos = sig_cos + math.cos(math.radians(lats[k]))         
+            sig_cos_x = sig_cos_x + (math.cos(math.radians(lats_bin_mid_saber[k])) * tracer_bin[j][k])
+            sig_cos = sig_cos + math.cos(math.radians(lats_bin_mid_saber[k]))         
             if  k == (highlat - 1):
                 tracer_weighted[j] = sig_cos_x / sig_cos
     return tracer_weighted
@@ -150,7 +151,7 @@ def altitude_plot_1d(name, tracer_weighted, alt_weighted, lowlat, highlat, units
     return
 
 def setup_altitude_plot_1d(tracer_bin, name, units):
-    plt.suptitle('%s, DOY=%s' %(set_year, set_day), fontsize=14)
+    plt.suptitle('%s, DOY=%s, night' %(set_year, set_day), fontsize=16)
     for i in range(0,6):    
         lowlat = i * 6
         highlat = (i * 6) + 6
@@ -170,9 +171,9 @@ fig, axes = plt.subplots(nrows=2, ncols=3, figsize=(11,8))
 gs1 = gridspec.GridSpec(2, 3)
 gs1.update(wspace=0.1, hspace=0.1)
 #setup_altitude_plot_1d(o3_bin, 'ozone', '$\mathregular{cm^{-3}}$')
-#setup_altitude_plot_1d(o_bin, 'atomic_oxygen', 'ppmv')
+setup_altitude_plot_1d(o_bin, 'atomic_oxygen', 'ppmv')
 #setup_altitude_plot_1d(h_bin, 'atomic_hydrogen', 'ppmv')
-setup_altitude_plot_1d(T_bin, 'temperature', 'K')
+#setup_altitude_plot_1d(T_bin, 'temperature', 'K')
 
 # 2D plot
 #pressure_plot_2d(o3_bin, 'ozone', '$\mathregular{cm^{-3}}$')
