@@ -4,7 +4,7 @@ import numpy as np
 import matplotlib.gridspec as gridspec
 import math
 from matplotlib import colors
-'''
+
 deg = unichr(176)
 set_year = 2014
 set_month = 'April'
@@ -27,7 +27,9 @@ T_bin = np.zeros([levels,36])
 lats_bin = np.zeros([levels,36])
 alt_bin = np.zeros([levels,36])
 time_bin = np.zeros([levels,36])
-'''
+
+lats_bin_mid_saber = np.arange(-87.5, 92.5, 5)
+
 def make_retrieval_arrays(tracer):
     tracer_bin = np.zeros([levels,36])
     for j in range(0,levels):
@@ -52,8 +54,8 @@ def calc_cos_factor(tracer_bin, lowlat, highlat):
         sig_cos_x = 0
         sig_cos = 0
         for k in range (lowlat, highlat):
-            sig_cos_x = sig_cos_x + (math.cos(math.radians(lats[k,j])) * tracer_bin[j][k])
-            sig_cos = sig_cos + math.cos(math.radians(lats[k,j]))         
+            sig_cos_x = sig_cos_x + (math.cos(math.radians(lats_bin_mid_saber[k])) * tracer_bin[j][k])
+            sig_cos = sig_cos + math.cos(math.radians(lats_bin_mid_saber[k]))  
             if  k == (highlat - 1):
                 tracer_weighted[j] = sig_cos_x / sig_cos
     return tracer_weighted
@@ -122,19 +124,19 @@ def setup_altitude_plot_1d(tracer_bin, name, units):
         tracer_weighted = calc_cos_factor(tracer_bin, lowlat, highlat)
         alt_weighted = calc_cos_factor(alt_bin, lowlat, highlat)
         altitude_plot_1d(name, tracer_weighted, alt_weighted, lowlat, highlat, units, i)
-'''
+
 o3_96_bin = make_retrieval_arrays(o3_96)
 #T_bin = make_retrieval_arrays(T)
 alt_bin = make_retrieval_arrays(alt)
 lats_bin = make_retrieval_arrays(lats)
 time_bin = make_retrieval_arrays(time)
-'''
+
 # 1D plot
 fig, axes = plt.subplots(nrows=2, ncols=3, figsize=(11,8))
 gs1 = gridspec.GridSpec(2, 3)
 gs1.update(wspace=0.1, hspace=0.1)
 setup_altitude_plot_1d(o3_96_bin*1.e+6, 'ozone_96', 'ppmv')
-plt.savefig('/nfs/a328/eecwk/saber/figures/SABER_Temp_O3/O3_96_profile_%s_%s_ppmv.jpg' %(set_month, set_year), bbox_inches='tight', dpi=300)
+#plt.savefig('/nfs/a328/eecwk/saber/figures/SABER_Temp_O3/O3_96_profile_%s_%s_ppmv.jpg' %(set_month, set_year), bbox_inches='tight', dpi=300)
 '''
 # 2D plot
 altitude_plot_2d(o3_96_bin*1.e+6, 'ozone_96', 'ppmv')
